@@ -1,9 +1,12 @@
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export async function fetchDashboard(email) {
   let res;
   try {
-    res = await fetch(`${API_BASE}/dashboard?email=${encodeURIComponent(email)}`);
+    // If VITE_API_BASE already includes `/api`, avoid doubling.
+    const base = API_BASE.replace(/\/+$/, '');
+    const path = base.endsWith('/api') ? `${base}/dashboard` : `${base}/api/dashboard`;
+    res = await fetch(`${path}?email=${encodeURIComponent(email)}`);
   } catch (err) {
     throw new Error(
       err.message === 'Failed to fetch'
