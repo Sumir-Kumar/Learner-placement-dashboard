@@ -359,16 +359,20 @@ app.get('/api/dashboard', async (req, res) => {
 
     res.json({ student: studentData, applications: appsData });
   } catch (err) {
-    console.error('Error fetching dashboard:', err.message);
+    console.error('Error fetching dashboard:', err);
+    if (err && err.response && err.response.data) {
+      console.error('Google API response data:', JSON.stringify(err.response.data));
+    }
     let hint = '';
-    if (err.message.includes('permission') || err.message.includes('403')) {
+    const msg = (err && err.message) ? err.message : String(err);
+    if (msg.includes('permission') || msg.includes('403')) {
       hint = ' Share both spreadsheets with your service account email (Viewer).';
-    } else if (err.message.includes('range') || err.message.includes('Unable to parse')) {
+    } else if (msg.includes('range') || msg.includes('Unable to parse')) {
       hint = ' Check that STUDENT_SHEET_RANGE and APPLICATIONS_SHEET_RANGE match your tab names (e.g. Main instead of Sheet1).';
     }
     res.status(500).json({
       error: 'Failed to fetch dashboard data',
-      message: err.message + hint,
+      message: msg + hint,
     });
   }
 });
